@@ -12,13 +12,13 @@ also released smaller versions of the model to the public (and later,
 the full version), leading to varied and often creative uses for model’s
 ability to construct somewhat convincing text after some additional
 training. So, I thought, what better way to learn about the technology
-and its capabilites than by following suit by digging in with my hands
-and using GPT-2 to power my own Twitter bot?
+and its capabilites than by digging in with my hands and using GPT-2 to
+power my own Twitter bot?
 
 I decided to train the model on the work of one of my favorite sources
 of philosophical wisdom: Seneca’s letters to his friend Lucilius. Seneca
 is a renowned Stoic philospher from 1st century Rome, who had the
-unenviable of task to advising the young Emperor Nero and assisting him
+unenviable of task of advising the young Emperor Nero and assisting him
 in day to day matters running the state. Later in life, Seneca crafted a
 collection of letters framed as correspondence to a close friend, but
 also convenient a format for detailing the applications of Stoic
@@ -34,8 +34,8 @@ involvement in an assassination plot against Emperor Nero.
 
 Seneca’s *Letters* also seemed a good choice because they contain
 numerous passages about mundane topics as well as diatribes into matters
-seemingly unrelated to the topic of the letter. Consider, for example,
-these reflections on how bee’s make honey:
+seemingly unrelated to the main topic of the letter. Consider, for
+example, these reflections on how bee’s make honey:
 
 > It is not certain whether the juice which they obtain from the flowers
 > forms at once into honey, or whether they change that which they have
@@ -58,10 +58,10 @@ these reflections on how bee’s make honey:
 
 Fascinating stuff. Of course, Seneca always ties these observations back
 into the main topic of his letter, but one can only imagine his thoughts
-on small matters we face in the modern world. Also, I find some passages
-from Seneca to be indecipherable, and thought it would be amusing to
-produce fake text that is similarly difficult for the reader to glean
-wisdom from.
+on the small matters we face in the modern world. Also, I find some
+passages from Seneca to be indecipherable, and thought it would be
+amusing to produce fake text that is similarly difficult for the reader
+to glean wisdom from.
 
 ## 1\) Gathering the text for training the GPT-2 model
 
@@ -127,23 +127,23 @@ runtime with powerful GPUs, a task I fear that my notebook might not be
 capable of handling. You can also save your trained model to your Google
 Drive for use later on when wanting to generate some original text. I
 also found that, despite the warning in Max’s notes, the 774 million
-parameter version the model **could in fact be trained in the
+parameter version of the model **could in fact be trained in the
 Colaboratory environment** (it is about 3GB on local storage). Be aware
 that `gpt_2_simple` requires Tensorflow 1.x. You may find it is better
-to run your model within a virtural environment if you often use
-Tensorflow 2.x for other tasks.
+to run your downloaded model within a virtural environment if you often
+use Tensorflow 2.x for other tasks.
 
 Once you have run through the steps in the Colaboratory notebook and
 downloaded your model that was trained on the text scraped in (1), you
 are ready to start generating text for Twitter status updates. Note that
 the scripts from this repo assumes your downloaded model is in a
-directory named `checkpoint` within your project folder.
+directory named `checkpoint/`, within your project folder.
 
 ## 3\) Creating the Twitter bot
 
 The `tweepy` module will be the main workhorse for this tasks, but the
 `schedule` module will prove important for operating the Twitter bot in
-the background later on. Install them using `pip` if you need to.
+the background later on. Install them using `pip` if need be.
 
     pip install tweepy schedule
 
@@ -152,25 +152,27 @@ permissions from [Twitter’s developer
 portal](https://developer.twitter.com/en). Once you have done so, you
 should be able to find the four API keys tied to either your account or
 specific app that are needed for authentication from the Python
-environment. In the GitHub repo, I have also included a file
-`sample_keys.json` as a template for entering these API keys in the
-format used in my code. The code for the Twitter bot is available in the
-file `twitter_bot.py`.
+environment. In order to authenticate, you will need to include a file
+`tokens.json` with the necessary API keys. In the GitHub repo, I have
+also included a file `tokens_example.json` as a template that can be
+saved and renamed. The code for the Twitter bot is available in the file
+`twitter_bot.py`.
 
 The function for generating text from the GPT-2 model and parsing the
 result for a Twitter status update is given below. A longer text
 sequence (2x the desired Tweet length) is generated using a random
-phrase from Seneca’s works. The text is then cut off before the word
-count is exceeded, but only complete sentences will be retained. The
-text will not cut off in the middle of a sentence. The text from the
-sentences to be retained are then combined and split again, this time by
-individual words. Individual words are then recombined into phrases
-without exceeding the maximum Tweet length (280 characters). These
-phrases are the text for each status update, and will often end in the
-middle of a sentence (never in the middle of a word). With the text
-ready to be posted, the only step left is the ensure the tweets appear
-in reply to the one preceeding it (except for the first one), forming a
-coherent thread of tweets.
+phrase from Seneca’s works. The text is then cut off before the
+specified word count is exceeded, but only complete sentences will be
+retained. The text will not cut off in the middle of a sentence. The
+text from the retained sentences are then combined and split again, this
+time into a list of individual words. The words are then recombined into
+phrases, one by one, without exceeding the maximum Tweet length (280
+characters). These phrases form the text for each status update, and
+will often end in the middle of a sentence (never in the middle of a
+word). With the text ready to be posted, the only step left is the
+ensure the tweets appear in reply to the status update that preceeded it
+(except for the first update). This will form a coherent thread of
+tweets.
 
 ``` python
 #Load pre-trained model from storage
@@ -180,7 +182,7 @@ print(sess)
 `<tensorflow.python.client.session.Session object at 0x7ff01468be10>`
 
 #Create function that generates new text (with parameters) and updates Twitter status
-def new_status(sess, word_count: int=500, temperature: float=0.7):
+def new_status(word_count: int=500, temperature: float=0.7):
   #output file name
   prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
   output_file = 'text/gpt2_gentext_{:%Y%m%d_%H%M%S}.txt'.format(datetime.utcnow())
@@ -253,10 +255,10 @@ scheduled tasks.
 
 ``` python
 opts = {"sess":sess, "word_count":600, "temperature":0.73}
-schedule.every(3).to(12).hours.do(new_status(**opts))
+schedule.every(3).to(12).hours.do(new_status)
 while True:
   schedule.run_pending()
-  time.sleep(10)
+  time.sleep(10) #pause 10 seconds
 ```
 
 Now, you can run the script in the background by entering the following
@@ -277,5 +279,5 @@ can get the Seneca-bot to mull over. For this, I will get trending
 topics on Twitter through the API and use them to construct prefix
 statements for the model to work off of. This may be somewhat of a
 challenge given that trending topics can range from catch-phrases, hash
-tags, and people’s name, but I have a few ideas to try out. I hope to
-post more code soon.
+tags, and people’s names, but I have a few ideas to get started with. I
+hope to post more code soon.

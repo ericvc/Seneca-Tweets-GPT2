@@ -57,7 +57,7 @@ sess = gpt2.start_tf_sess()
 gpt2.load_gpt2(sess)
 
 #Create function that generates new text (with parameters) and updates Twitter status
-def new_status(sess, word_count: int=500, temperature: float=0.7):
+def new_status(word_count: int=500, temperature: float=0.7):
   #output file name
   prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
   output_file = 'text/gpt2_gentext_{:%Y%m%d_%H%M%S}.txt'.format(datetime.utcnow())
@@ -125,7 +125,7 @@ def new_status(sess, word_count: int=500, temperature: float=0.7):
 
 # Get conversation prefix(es)
 opts = {"sess":sess, "word_count":600, "temperature":0.73}
-schedule.every(3).to(12).hours.do(new_status(**opts))
+schedule.every(3).to(12).hours.do(new_status)
 while True:
   schedule.run_pending()
   time.sleep(10)
