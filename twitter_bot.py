@@ -52,15 +52,20 @@ for letter in processed_letters:
         phrase_starters.append(phrase)
 
 
-#Load pre-trained model from storage
+#Load pre-trained model from local storage
 sess = gpt2.start_tf_sess()
 gpt2.load_gpt2(sess)
 
+
 #Create function that generates new text (with parameters) and updates Twitter status
-def new_status(word_count: int=500, temperature: float=0.7):
+def new_status(word_count:int, temperature:float, prefix=True):
   #output file name
-  prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
   output_file = 'text/gpt2_gentext_{:%Y%m%d_%H%M%S}.txt'.format(datetime.utcnow())
+  #topic prefix
+  if prefix and not isinstance(prefix, str):
+    prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
+  else:
+    assert(isinstance(prefix, str))
   gpt2.generate_to_file(
                   sess,
                   destination_path = output_file,
@@ -123,9 +128,14 @@ def new_status(word_count: int=500, temperature: float=0.7):
     time.sleep(1)
 
 
-# Get conversation prefix(es)
-opts = {"sess":sess, "word_count":600, "temperature":0.73}
-schedule.every(3).to(12).hours.do(new_status)
+def run_task():
+    word_count = rand.randint(350, 700)
+    prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
+    opts = {"word_count":word_count, "temperature":0.7, "prefix":prefix}
+    new_status(**opts)
+    
+
+schedule.every(2).to(8).hours.do(run_task)
 while True:
   schedule.run_pending()
   time.sleep(10)

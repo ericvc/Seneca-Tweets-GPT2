@@ -201,7 +201,7 @@ def new_status(word_count: int=500, temperature: float=0.7):
   with open(output_file, "r") as f:
     generated_text = f.readlines()
   #split text into a list of sentences
-  generated_sentences = re.split(["[\\.!?]"], generated_text[0])#.replace("\n"," ")
+  generated_sentences = generated_text[0].split(".")
   #calculate the length of each sentence
   sentence_lengths = [len(sentence)+1 for sentence in generated_sentences]
   #cumulative sum of sentence lengths
