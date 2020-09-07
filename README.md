@@ -4,8 +4,8 @@ Seneca Tweets: A Tweet Bot Powered by GPT-2 and Ancient Daily Wisdom
 ## 0\) Introduction
 
 I am very interested in analyzing time-series data, and was wanting to
-learn more about the transformer architecture that underlies state of
-the art natural language processing models in machine learning. In late
+learn more about the transformer machine learning architecture that
+underlies state of the art natural language processing models. In late
 2019, OpenAI revealed their game changing GPT-2 model which is capable
 of generating very realistic text. After some initial hesitation, they
 also released smaller versions of the model to the public (and later,
@@ -19,23 +19,24 @@ I decided to train the model on the work of one of my favorite sources
 of philosophical wisdom: Seneca’s letters to his friend Lucilius. Seneca
 is a renowned Stoic philospher from 1st century Rome, who had the
 unenviable of task of advising the young Emperor Nero and assisting him
-in day to day matters running the state. Later in life, Seneca crafted a
-collection of letters framed as correspondence to a close friend, but
-also convenient a format for detailing the applications of Stoic
-philosophy to the kinds of matters one is likely to encounter on a daily
-basis. In these letters, Seneca muses about topics such as drunkeness,
-solitude, aging, illness, friendship, suicide, and death. While many
-such topics might seem morbid by today’sensibilities, such a fixation on
-death and suffering are common fodder for Stoic philosophers more
-generally (how better to test Stoic resolve than in the face of death?)
-and may reflect the realities of ancient life. Indeed, Seneca’s own life
-came to an end by suicide, ordered as a punishment for his alleged
-involvement in an assassination plot against Emperor Nero.
+in the day to day matters of running the state. Later in life, Seneca
+wrote a collection of letters framed as correspondence to his close
+friend Lucilius, but also a convenient format for detailing the
+applications of Stoic philosophy to the kinds of matters one is likely
+to encounter on a daily basis. In these letters, Seneca muses about
+topics such as drunkeness, solitude, aging, illness, friendship,
+suicide, and death. While many such topics might seem morbid by today’s
+sensibilities, such a fixation on death and suffering are common fodder
+for Stoic philosophers more generally (how better to test Stoic resolve
+than in the face of death?) and may also simply reflect the realities of
+ancient life. Indeed, Seneca’s own life came to an end by suicide,
+ordered as a punishment for his alleged involvement in an assassination
+plot against Emperor Nero.
 
 Seneca’s *Letters* also seemed a good choice because they contain
-numerous passages about mundane topics as well as diatribes into matters
-seemingly unrelated to the main topic of the letter. Consider, for
-example, these reflections on how bee’s make honey:
+numerous passages concerning mundane topics as well as diatribes into
+matters seemingly unrelated to the main topic of the letter. Consider,
+for example, these reflections on how bee’s make honey:
 
 > It is not certain whether the juice which they obtain from the flowers
 > forms at once into honey, or whether they change that which they have
@@ -134,9 +135,9 @@ to run your downloaded model within a virtural environment if you often
 use Tensorflow 2.x for other tasks.
 
 Once you have run through the steps in the Colaboratory notebook and
-downloaded your model that was trained on the text scraped in (1), you
-are ready to start generating text for Twitter status updates. Note that
-the scripts from this repo assumes your downloaded model is in a
+downloaded your model that was trained on the text scraped in **(1)**,
+you are ready to start generating text for Twitter status updates. Note
+that the scripts from this repo assumes your downloaded model is in a
 directory named `checkpoint/`, within your project folder.
 
 ## 3\) Creating the Twitter bot
