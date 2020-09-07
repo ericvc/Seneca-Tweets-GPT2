@@ -7,30 +7,33 @@ I am very interested in analyzing time-series data, and was wanting to
 learn more about the transformer architecture that underlies state of
 the art natural language processing models in machine learning. In late
 2019, OpenAI revealed their game changing GPT-2 model which is capable
-of producing realistic text. After some initial hesitation, they also
-released smaller versions of the model to the public, leading to
-numerous and often creative uses for model’s ability to construct
-somewhat convincing text. What better way to learn about the technology
-and its capabilites, I thought, than by digging in and using it power my
-own Twitter bot?
+of generating very realistic text. After some initial hesitation, they
+also released smaller versions of the model to the public (and later,
+the full version), leading to varied and often creative uses for model’s
+ability to construct somewhat convincing text after some additional
+training. So, I thought, what better way to learn about the technology
+and its capabilites than by following suit by digging in with my hands
+and using GPT-2 to power my own Twitter bot?
 
-I decided to train the model using the work of one of my favorite
-sources of philosophical wisdom: Seneca’s letters to his friend
-Lucilius. Seneca is a renowned Stoic philospher from 1st century Rome,
-who had the unenviable of task to advising the young Emperor Nero and
-assisting him in day to day matters running the state. Later in life,
-Seneca crafted a collection of letters framed as correspondence to a
-close friend, but also a format for detailing the applications of Stoic
-philosophy to matters one is likely to encounter daily. In this
-collection, Seneca muses about topics drunkeness, suicide, death, and
-illness. While many such topics might seem morbid by
-today’sensibilities, such a fixation on death and suffering are common
-fodder for Stoic philosophers more generally (how better to test Stoic
-resolve than in the face of death?) and may reflect the realities of
-ancient life.insights from.
+I decided to train the model on the work of one of my favorite sources
+of philosophical wisdom: Seneca’s letters to his friend Lucilius. Seneca
+is a renowned Stoic philospher from 1st century Rome, who had the
+unenviable of task to advising the young Emperor Nero and assisting him
+in day to day matters running the state. Later in life, Seneca crafted a
+collection of letters framed as correspondence to a close friend, but
+also convenient a format for detailing the applications of Stoic
+philosophy to the kinds of matters one is likely to encounter on a daily
+basis. In these letters, Seneca muses about topics such as drunkeness,
+solitude, aging, illness, friendship, suicide, and death. While many
+such topics might seem morbid by today’sensibilities, such a fixation on
+death and suffering are common fodder for Stoic philosophers more
+generally (how better to test Stoic resolve than in the face of death?)
+and may reflect the realities of ancient life. Indeed, Seneca’s own life
+came to an end by suicide, ordered as a punishment for his alleged
+involvement in an assassination plot against Emperor Nero.
 
-Seneca’s *Letters* were also a good choice because they contain numerous
-passages about mundane topics as well as diatribes into matters
+Seneca’s *Letters* also seemed a good choice because they contain
+numerous passages about mundane topics as well as diatribes into matters
 seemingly unrelated to the topic of the letter. Consider, for example,
 these reflections on how bee’s make honey:
 
@@ -53,11 +56,12 @@ these reflections on how bee’s make honey:
 > 
 > \-*Letters LXXXIV, On Gathering Ideas*
 
-Of course, Seneca always ties these observations back into the main
-topic, but one can only imagine his thoughts on small matters in modern
-living. Also, I find some passages from Seneca to be indecipherable, and
-thought it would be amusing to produce fake text that is similarly
-difficult for the reader to glean wisdom from.
+Fascinating stuff. Of course, Seneca always ties these observations back
+into the main topic of his letter, but one can only imagine his thoughts
+on small matters we face in the modern world. Also, I find some passages
+from Seneca to be indecipherable, and thought it would be amusing to
+produce fake text that is similarly difficult for the reader to glean
+wisdom from.
 
 ## 1\) Gathering the text for training the GPT-2 model
 
@@ -131,7 +135,9 @@ Tensorflow 2.x for other tasks.
 
 Once you have run through the steps in the Colaboratory notebook and
 downloaded your model that was trained on the text scraped in (1), you
-are ready to start generating text for Twitter status updates.
+are ready to start generating text for Twitter status updates. Note that
+the scripts from this repo assumes your downloaded model is in a
+directory named `checkpoint` within your project folder.
 
 ## 3\) Creating the Twitter bot
 
@@ -256,9 +262,15 @@ while True:
 Now, you can run the script in the background by entering the following
 in your terminal window:
 
-    py twitter_bot.py
+    python twitter_bot.py
 
 ## Future Directions
+
+The model currently runs on the 355 million parameter version of GPT-2,
+but will soon move this project to the 774 million parameter version.
+Right now, the biggest obstacle to this upgrade is generating text from
+the much larger model in a reasonable time frame from my personal
+desktop.
 
 I am excited to keep working on this project and seeing what topics I
 can get the Seneca-bot to mull over. For this, I will get trending

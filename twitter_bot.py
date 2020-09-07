@@ -125,7 +125,6 @@ def new_status(sess, word_count: int=500, temperature: float=0.7):
 
 # Get conversation prefix(es)
 opts = {"sess":sess, "word_count":600, "temperature":0.73}
-new_status(**opts)
 schedule.every(3).to(12).hours.do(new_status(**opts))
 while True:
   schedule.run_pending()
