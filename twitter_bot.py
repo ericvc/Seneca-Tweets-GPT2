@@ -11,13 +11,14 @@ import numpy as np
 import schedule
 import re
 
-# Authenticate to Twitter
+# Load API keys for Twitter OAuth
 with open('tokens.json') as f:
   keys = json.load(f)
-  
+ 
+ 
+# Authenticate with Twitter
 auth = tweepy.OAuthHandler(keys["CONSUMER_KEY"], keys["CONSUMER_SECRET"])
 auth.set_access_token(keys["ACCESS_TOKEN"], keys["ACCESS_TOKEN_SECRET"])
-
 # Create API object
 api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
@@ -32,12 +33,14 @@ api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 # for trend in trends[0]["trends"]:
 # 	print (trend["name"])
 
+
 # Load scraped text
 fname = "data/letters_punct.pkl"
 with open(fname, 'rb') as f:
     processed_letters = pickle.load(f)
 
-#Get some sentence starters
+
+# Get some sentence starters from the raw (scraped) text
 phrase_starters = []
 for letter in processed_letters:
     sentences = re.split("[\\.!?]", letter)
@@ -52,16 +55,16 @@ for letter in processed_letters:
         phrase_starters.append(phrase)
 
 
-#Load pre-trained model from local storage
+# Load pre-trained model from local storage
 sess = gpt2.start_tf_sess()
 gpt2.load_gpt2(sess)
 
 
-#Create function that generates new text (with parameters) and updates Twitter status
+# Create function that generates new text (with parameters) and updates Twitter status
 def new_status(word_count:int, temperature:float, prefix=True):
-  #output file name
+  # Output file name
   output_file = 'text/gpt2_gentext_{:%Y%m%d_%H%M%S}.txt'.format(datetime.utcnow())
-  #topic prefix
+  # Topic prefix
   if prefix and not isinstance(prefix, str):
     prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
   else:
@@ -76,49 +79,51 @@ def new_status(word_count:int, temperature:float, prefix=True):
                   nsamples=1,
                   batch_size=1
                   )
-  # read text from generated file
+  # Read text from generated file
   with open(output_file, "r") as f:
     generated_text = f.readlines()
-  #split text into a list of sentences
-  # generated_sentences = re.split(["[\\.!?]"], str(generated_text[0]))#.replace("\n"," ")
-  generated_sentences = generated_text[0].split(".")
-  #calculate the length of each sentence
+  # Concatenate and remove line breaks
+  generated_text = (" ".join(generated_text)).replace("\n"," ")
+  # Split text into a list of sentences
+  # generated_sentences = re.split('[\\.?!]\\s', generated_text)
+  generated_sentences = generated_text.split(".")
+  # Calculate the length of each sentence (add one for punctuation at the end of sentences)
   sentence_lengths = [len(sentence)+1 for sentence in generated_sentences]
-  #cumulative sum of sentence lengths
+  # Cumulative sum of sentence lengths
   cumulative_length = np.cumsum(sentence_lengths)
-  #find those sentences that can fit under the specified word count (default=500)
+  # Find those sentences that can fit under the specified word count (default=500)
   sentence_index = np.where(cumulative_length<word_count)[0]
-  #isolate only those initial sentences
+  # Isolate only those initial sentences
   sentences = [generated_sentences[i] for i in sentence_index]
-  #join sentences into a single string
-  sentences_text = ".".join(sentences)+"."
-  #split string by word
+  # Join sentences into a single string (add extra period to final sentence)
+  sentences_text = ".".join(sentences) + "."
+  # Split string by word
   words = sentences_text.split(" ")
-  #containers
+  # Containers
   status_text = []
   text = ""
-  #sequentially adds words to a string until they exceed word limit
+  # Sequentially adds words to a string until they exceed word limit
   while words:
-    if (len(text) + len(words[0]) + 1) <  276:
+    if (len(text) + len(words[0]) + 1) <  274:
       text = text + " " + words[0]
       del words[0]
     else:
       status_text.append(text)
       text = ""
   status_text.append(text)
-  #how many tweets to spread text over?
+  # How many tweets to spread text over?
   num_tweets = len(status_text)
   for tweet in range(0, num_tweets):
     if num_tweets > 1:
       text = status_text[tweet][1:]
       # Create a status update (with sequence formatting)
-      status = text + " {}/{}".format(tweet+1, num_tweets)
+      status = text + " [{}/{}]".format(tweet+1, num_tweets)
       if tweet == 0:
-        #Status update to timeline
+        # Status update to timeline
         api.update_status(status)
         tweetId = api.get_user("SenecaGPT2").status.id
       else:
-        #Create status update as a reply in thread
+        # Create status update as a reply in thread
         api.update_status(status, in_reply_to_status_id = tweetId)
         tweetId = api.get_user("SenecaGPT2").status.id
     else:
@@ -128,16 +133,19 @@ def new_status(word_count:int, temperature:float, prefix=True):
     time.sleep(1)
 
 
+# Create wrapper function for the `new_status` function, used when scheduling status updates
 def run_task():
-    word_count = rand.randint(350, 700)
+    # Randomize word count
+    word_count = rand.randint(350, 900)
+    # Randomly select starting phrase (prefix)
     prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
+    # Specify options for the new status update
     opts = {"word_count":word_count, "temperature":0.7, "prefix":prefix}
     new_status(**opts)
     
 
-schedule.every(2).to(8).hours.do(run_task)
+# Schedule status updates at variable intervals
+schedule.every(4).to(12).hours.do(run_task)
 while True:
   schedule.run_pending()
   time.sleep(10)
-
-

@@ -7,13 +7,13 @@ I am very interested in analyzing time-series data, and was wanting to
 learn more about the transformer machine learning architecture that
 underlies state of the art natural language processing models. In late
 2019, OpenAI revealed their game changing GPT-2 model which is capable
-of generating very realistic text. After some initial hesitation, they
-also released smaller versions of the model to the public (and later,
-the full version), leading to varied and often creative uses for model’s
-ability to construct somewhat convincing text after some additional
-training. So, I thought, what better way to learn about the technology
-and its capabilites than by digging in with my hands and using GPT-2 to
-power my own Twitter bot?
+of generating very realistic long-form text. After some initial
+hesitation, OpenAI released smaller versions of the model to the public
+(and later, the full version), resulting in varied and often creative
+uses for model’s ability to construct somewhat convincing text after
+some additional training. So, I thought, what better way to learn about
+the technology and its capabilites than by digging in with my hands and
+using GPT-2 to power my own Twitter bot?
 
 I decided to train the model on the work of one of my favorite sources
 of philosophical wisdom: Seneca’s letters to his friend Lucilius. Seneca
@@ -23,17 +23,17 @@ in the day to day matters of running the state. Later in life, Seneca
 wrote a collection of letters framed as correspondence to his close
 friend Lucilius, but also a convenient format for detailing the
 applications of Stoic philosophy to the kinds of matters one is likely
-to encounter on a daily basis. In these letters, Seneca muses about
-topics such as drunkeness, solitude, aging, illness, friendship,
+to encounter on a daily basis. In these letters, Seneca pontificates
+about topics such as drunkeness, solitude, aging, illness, friendship,
 suicide, and death. While many such topics might seem morbid by today’s
 sensibilities, such a fixation on death and suffering are common fodder
 for Stoic philosophers more generally (how better to test Stoic resolve
 than in the face of death?) and may also simply reflect the realities of
-ancient life. Indeed, Seneca’s own life came to an end by suicide,
-ordered as a punishment for his alleged involvement in an assassination
-plot against Emperor Nero.
+ancient life. Indeed, Seneca’s own life came to an end by suicide, which
+was ordered by Nero as a punishment for Seneca’s alleged involvement in
+an assassination plot against the emperor.
 
-Seneca’s *Letters* also seemed a good choice because they contain
+Seneca’s *Letters* also seemed to me a good choice because they contain
 numerous passages concerning mundane topics as well as diatribes into
 matters seemingly unrelated to the main topic of the letter. Consider,
 for example, these reflections on how bee’s make honey:
@@ -58,32 +58,34 @@ for example, these reflections on how bee’s make honey:
 > \-*Letters LXXXIV, On Gathering Ideas*
 
 Fascinating stuff. Of course, Seneca always ties these observations back
-into the main topic of his letter, but one can only imagine his thoughts
-on the small matters we face in the modern world. Also, I find some
-passages from Seneca to be indecipherable, and thought it would be
-amusing to produce fake text that is similarly difficult for the reader
-to glean wisdom from.
+into the main topic of his letter, and one can only imagine what his
+thoughts on small matters of modern life might be. Also, I have to admit
+that I find some passages from Seneca to be indecipherable due to his
+ancient writing style, and thought it would be amusing to produce
+Seneca-like text that is similarly difficult for the reader to glean
+wisdom from.
 
 ## 1\) Gathering the text for training the GPT-2 model
 
 Code for scraping the text of Seneca’s letters is contained in the
-`scrape_letters.py` file. The text comes from
-[Wikisource.org](https://en.wikisource.org/wiki/), and is, of course, in
-the public domain.
+`scrape_letters.py` file. One online source for the text is
+[Wikisource.org](https://en.wikisource.org/wiki/), and the content is,
+of course, in the public domain.
 
 ![Inspect the webpage from your browser.](html.png)
 
-Most of the work gathering the text of each letter from websites is
-handled by the `requests` and `bs4` (BeautifulSoup) libraries, which are
-used for managing HTTP requests and parsing the responses, respectively.
-If you navigate to the [Wikisource page featuring a list of Seneca’s
+In order to gather the text of each letter from websites I used the
+`requests` and `bs4` (BeautifulSoup) Python libraries, which are needed
+to manage HTTP requests and parse the responses, respectively. If you
+navigate to the [Wikisource page featuring a list of Seneca’s
 letters](https://en.wikisource.org/wiki/Moral_letters_to_Lucilius) and
-browse a handful of examples, you will notice they follow a similar
-layout and presentation. Inspecting the underlying HTML code indeed
-reveals that the content of the letters is contained within the
+browse a handful of examples, you might notice they all follow a similar
+layout and presentation on the page. Inspecting the underlying HTML code
+indeed reveals that the content of the letters is contained within the
 paragraph tags (`<p>`). The scraper works by gathering the content of
-these paragraph tags and then formatting the text for training purposes.
-Below is some of the code for scraping the text of the letters from the
+these paragraph tags and then formatting the text for evetually training
+the model. Below is some of the code for scraping the text of the
+letters from the
 site:
 
 ``` python
@@ -112,27 +114,34 @@ class Scraper:
               print("Something went wrong (Attribute Error)")
         else:
             print(f"Webpage response status code did not return 200 (STATUS: {response.status_code})")
+            
+#Get all 124 letters to Lucilius
+letters = []
+for l in range(1, 125):
+    letter = Scraper(index=l)
+    letter.scrape_letter()
+    letters.append(letter.letter)
+    time.sleep(0.1)
 ```
 
-Once the text is scraped, formatted, and saved to disk as a `.txt` file,
-you are ready to train your model on the corpus.
+Once the text is scraped, formatted, and saved to local storage as a
+`.txt` file, you are ready to train your model on the corpus.
 
 ## 2\) Training the model
 
-Most of the heavy lifting in training the model was done using [Max
+The heavy lifting in training the GPT-2 model was handled by [Max
 Woolf’s](https://minimaxir.com/) `gpt_2_simple` library along with the
 Google Colaboratory notebook provided on his [GitHub
 repo](https://github.com/minimaxir/gpt-2-simple). The notebook and
-library make it easy to train a version of GPT-2 on a Google hosted
-runtime with powerful GPUs, a task I fear that my notebook might not be
-capable of handling. You can also save your trained model to your Google
-Drive for use later on when wanting to generate some original text. I
-also found that, despite the warning in Max’s notes, the 774 million
-parameter version of the model **could in fact be trained in the
-Colaboratory environment** (it is about 3GB on local storage). Be aware
-that `gpt_2_simple` requires Tensorflow 1.x. You may find it is better
-to run your downloaded model within a virtural environment if you often
-use Tensorflow 2.x for other tasks.
+library make it easy to train different versions of GPT-2 on a
+Google-hosted runtime featuring powerful GPUs. You can also save your
+trained model to your Google Drive for use later on when wanting to
+generate some original text. I also found that, despite the warning in
+Max’s notes, the 774 million parameter version of the model **could in
+fact be trained in the Colaboratory environment** (it is about 3GB on
+local storage). Also, be aware that `gpt_2_simple` requires Tensorflow
+1.x. You may find it is better to run your downloaded model within a
+virtural environment if you often use Tensorflow 2.x for other tasks.
 
 Once you have run through the steps in the Colaboratory notebook and
 downloaded your model that was trained on the text scraped in **(1)**,
@@ -142,22 +151,22 @@ directory named `checkpoint/`, within your project folder.
 
 ## 3\) Creating the Twitter bot
 
-The `tweepy` module will be the main workhorse for this tasks, but the
-`schedule` module will prove important for operating the Twitter bot in
+The `tweepy` library will be the main workhorse for this tasks, but the
+`schedule` library will prove important for operating the Twitter bot in
 the background later on. Install them using `pip` if need be.
 
     pip install tweepy schedule
 
 First, you will need to create a new Twitter account and request API
 permissions from [Twitter’s developer
-portal](https://developer.twitter.com/en). Once you have done so, you
+portal](https://developer.twitter.com/en). Once you have done this, you
 should be able to find the four API keys tied to either your account or
-specific app that are needed for authentication from the Python
-environment. In order to authenticate, you will need to include a file
-`tokens.json` with the necessary API keys. In the GitHub repo, I have
-also included a file `tokens_example.json` as a template that can be
-saved and renamed. The code for the Twitter bot is available in the file
-`twitter_bot.py`.
+specific app you are working on. All are needed for authentication from
+the Python environment. In order to authenticate, you will also need to
+include a file named `tokens.json` containing your API keys. In the
+GitHub repo, I have included a template file `tokens_example.json` that
+can be saved and renamed for this purpose. The full code for the Twitter
+bot is available in the file `twitter_bot.py`.
 
 The function for generating text from the GPT-2 model and parsing the
 result for a Twitter status update is given below. A longer text
@@ -182,63 +191,70 @@ gpt2.load_gpt2(sess)
 print(sess)
 `<tensorflow.python.client.session.Session object at 0x7ff01468be10>`
 
-#Create function that generates new text (with parameters) and updates Twitter status
-def new_status(word_count: int=500, temperature: float=0.7):
-  #output file name
-  prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
+# Create function that generates new text (with parameters) and updates Twitter status
+def new_status(word_count:int, temperature:float, prefix=True):
+  # Output file name
   output_file = 'text/gpt2_gentext_{:%Y%m%d_%H%M%S}.txt'.format(datetime.utcnow())
+  # Topic prefix
+  if prefix and not isinstance(prefix, str):
+    prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
+  else:
+    assert(isinstance(prefix, str))
   gpt2.generate_to_file(
                   sess,
                   destination_path = output_file,
-                  length=np.floor(word_count*2),
+                  length=np.floor(word_count*2.5),
                   temperature=temperature,
                   prefix=prefix,
                   # truncate=".",
                   nsamples=1,
                   batch_size=1
                   )
-  # read text from generated file
+  # Read text from generated file
   with open(output_file, "r") as f:
     generated_text = f.readlines()
-  #split text into a list of sentences
-  generated_sentences = generated_text[0].split(".")
-  #calculate the length of each sentence
+  # Concatenate and remove line breaks
+  generated_text = (" ".join(generated_text)).replace("\n"," ")
+  # Split text into a list of sentences
+  # generated_sentences = re.split('[\\.?!]\\s', generated_text)
+  generated_sentences = generated_text.split(".")
+  # Calculate the length of each sentence (add one for punctuation at the end of sentences)
   sentence_lengths = [len(sentence)+1 for sentence in generated_sentences]
-  #cumulative sum of sentence lengths
+  # Cumulative sum of sentence lengths
   cumulative_length = np.cumsum(sentence_lengths)
-  #find those sentences that can fit under the specified word count (default=500)
+  # Find those sentences that can fit under the specified word count (default=500)
   sentence_index = np.where(cumulative_length<word_count)[0]
-  #isolate only those initial sentences
+  # Isolate only those initial sentences
   sentences = [generated_sentences[i] for i in sentence_index]
-  #join sentences into a single string
-  sentences_text = ".".join(sentences)+"."
-  #split string by word
+  # Join sentences into a single string (add extra period to final sentence)
+  sentences_text = ".".join(sentences) + "."
+  # Split string by word
   words = sentences_text.split(" ")
-  #containers
+  # Containers
   status_text = []
   text = ""
-  #sequentially adds words to a string until they exceed word limit
+  # Sequentially adds words to a string until they exceed word limit
   while words:
-    if (len(text) + len(words[0]) + 1) <  276:
+    if (len(text) + len(words[0]) + 1) <  274:
       text = text + " " + words[0]
       del words[0]
     else:
       status_text.append(text)
       text = ""
   status_text.append(text)
-  #how many tweets to spread text over?
+  # How many tweets to spread text over?
   num_tweets = len(status_text)
   for tweet in range(0, num_tweets):
     if num_tweets > 1:
       text = status_text[tweet][1:]
       # Create a status update (with sequence formatting)
-      status = text + " {}/{}".format(tweet+1, num_tweets)
+      status = text + " [{}/{}]".format(tweet+1, num_tweets)
       if tweet == 0:
-        #Status update to timeline
+        # Status update to timeline
         api.update_status(status)
         tweetId = api.get_user("SenecaGPT2").status.id
       else:
-        #Create status update as a reply in thread
+        # Create status update as a reply in thread
         api.update_status(status, in_reply_to_status_id = tweetId)
         tweetId = api.get_user("SenecaGPT2").status.id
     else:
@@ -248,18 +264,24 @@ def new_status(word_count: int=500, temperature: float=0.7):
     time.sleep(1)
 ```
 
-With our function ready to go, all that is left to do is schedule it to
-run at the desired interval. Here, I use the `schedule` library to
-create new status updates every 3 to 12 hours. The `while` loop will run
-continuously, checking at each iteration if it is time to run the
-scheduled tasks.
+To schedule the bot to post periodic updates, I first created a wrapper
+function `run_task()` to call the `new_status()` function with
+randomized options for the word count and prefix. The `run_task()`
+functions generates these randomized options and saves them to the
+dictionary `opts`. These options are passed to the update function by
+unpacking the dictionary
+`new_status(**opts)`.
 
 ``` python
-opts = {"sess":sess, "word_count":600, "temperature":0.73}
-schedule.every(3).to(12).hours.do(new_status)
-while True:
-  schedule.run_pending()
-  time.sleep(10) #pause 10 seconds
+# Create wrapper function for the `new_status` function, used when scheduling status updates
+def run_task():
+    # Randomize word count
+    word_count = rand.randint(350, 900)
+    # Randomly select starting phrase (prefix)
+    prefix = phrase_starters[rand.randint(0, len(phrase_starters))]
+    # Specify options for the new status update
+    opts = {"word_count":word_count, "temperature":0.7, "prefix":prefix}
+    new_status(**opts)
 ```
 
 Now, you can run the script in the background by entering the following
@@ -269,11 +291,14 @@ in your terminal window:
 
 ## Future Directions
 
-The model currently runs on the 355 million parameter version of GPT-2,
-but will soon move this project to the 774 million parameter version.
-Right now, the biggest obstacle to this upgrade is generating text from
-the much larger model in a reasonable time frame from my personal
-desktop.
+Initially, the twitter bot ran on the 355 million parameter version of
+the model, but I soon swapped in a version trained on the 774 million
+parameter version. I have not yet noticed a significant difference in
+terms of text output, but the larger version is only slightly more
+demanding of my desktop’s resources than the smaller version. I will
+probably keep tuning other versions of model using the steps in **(2)**.
+It is easy to swap them in simply by replacing the `checkpoint/`
+directory.
 
 I am excited to keep working on this project and seeing what topics I
 can get the Seneca-bot to mull over. For this, I will get trending
