@@ -14,7 +14,7 @@ class Scraper:
         self.letter_index = index
         self.url = f"https://en.wikisource.org/wiki/Moral_letters_to_Lucilius/Letter_{self.letter_index}"
         self.USER_AGENT_HEADERS = {"user-agent":"Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:24.0) Gecko/20100101 Firefox/24.0"}
-        self.letter = ""
+        self.text = ""
         
     def scrape_letter(self):
         # GET request
@@ -36,10 +36,10 @@ class Scraper:
 
 #Get all 124 letters to Lucilius
 letters = []
-for l in range(0, 124):
-    l = Scraper(index=l+1)
-    l.scrape_letter()
-    letters.append(l.letter)
+for l in range(1, 125):
+    letter = Scraper(index=l)
+    letter.scrape_letter()
+    letters.append(letter.text)
     time.sleep(0.1)
 
 # Create functions to process text for the model
@@ -56,7 +56,6 @@ def REPLACE_QUOTATION(x):
     return re.compile('"').sub("", x)
 
 def REPLACE_CHARACTER(x):
-    # return re.compile("[\\–;:\\-,\[\]\/]").sub(" ", x)
     return re.compile("[\[\]\/]").sub(" ", x)
 
 def REPLACE_NUMBER(x):
